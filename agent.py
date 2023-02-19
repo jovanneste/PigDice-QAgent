@@ -2,11 +2,6 @@ import numpy as np
 import random
 import sys
 
-global qtable
-global N
-
-N = 20
-
 def roll():
     return random.choice([1,2,3,4,5,6])
 
@@ -14,11 +9,12 @@ def roll():
 def player2play():
     score = 0
     while score<N:
-        n = roll()
-        if n!=0:
-            score+=n
-        else:
-            return 0
+        for i in range(dice_num):
+            n = roll()
+            if n!=0:
+                score+=n
+            else:
+                return 0
     return 1
 
 
@@ -27,13 +23,13 @@ def step(state, a):
     reward = 0
     if a==0:
         # roll
-        n = roll()
-        if n==1 and state!=0:
-            reward = -1
-            new_state = 0
-        else:
-            reward = 1
-            new_state = state + n
+        for i in range(dice_num):
+            n = roll()
+            if n==1 and state!=0:
+                return 0, done, -1
+            else:
+                reward += 1
+                new_state = state + n
 
     else:
         # hold
@@ -53,18 +49,20 @@ def step(state, a):
 
     return new_state, done, reward
 
+global N
+global qtable
 
-
-
+N = int(input("Winning number: "))
+dice_num = int(input("Number of dice: "))
 qtable = np.zeros((N+1, 2))
 
+# parameters
 learning_rate = 0.8
 discount_rate = 0.6
-# explore a lot at the start
 epsilon = 0.9
 decay_rate= 0.005
 
-num_episodes = 100
+num_episodes = 10*(N*2)
 max_steps = 20
 
 print("Training agent...")
@@ -92,9 +90,9 @@ for episode in range(num_episodes):
         if done == True:
             break
 
-        
     epsilon = np.exp(-decay_rate*episode)
 
+print(qtable)
 
 print("Agent playing naive player...")
 matches = 1000
