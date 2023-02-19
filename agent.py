@@ -69,7 +69,6 @@ max_steps = 20
 
 print("Training agent...")
 for episode in range(num_episodes):
-    print("Episode:", episode)
     done = False
     # reset start state
     state = 0
@@ -84,8 +83,6 @@ for episode in range(num_episodes):
         # perfom action
         new_state, done, reward = step(state, action)
        
-
-
         # update q table
         qtable[state, action] += learning_rate * (reward + discount_rate *
                                             np.max(qtable[new_state,:])-qtable[state,action]).round(2)
@@ -93,34 +90,31 @@ for episode in range(num_episodes):
 
         state = new_state
         if done == True:
-            print("Done in " +str(s) + " iterations")
             break
 
         
     epsilon = np.exp(-decay_rate*episode)
 
 
-print(qtable)
+print("Agent playing naive player...")
+matches = 1000
+pl1, pl2 = 0, 0
+for i in range(matches):
+    done = False
+    state = 0
+    while not done:
+        action = np.argmax(qtable[[state],:])
+        new_state, done, reward = step(state, action)
+        if done:
+            if new_state<20:
+                # new state will be 0 if we lost
+                pl2 += 1
+            else:
+                pl1 += 1
 
-# rewards = 0
-# done = False
-# print(f"TRAINED AGENT")
-# print(mapping)
-# print(maze)
-# state = np.where(maze == '$')
-# for s in range(2):
-#     print(tuple(np.squeeze(state)))
-#     print(qtable[mapping[tuple(np.squeeze(state))]])
-#     action = np.argmax(qtable[mapping[tuple(np.squeeze(state))],:])
-#     print(action)
-#     new_state, done, reward = step(state, action)
 
+        state = new_state
 
-
-#     rewards += reward
-
-#     # print(f"score: {rewards}")
-#     state = new_state
-
-#     if done == True:
-#         break
+print("Results:")
+print("Player 1 won: " + str(pl1*100/matches) + "% of the time")
+print("Player 2 won: " + str(pl2*100/matches) + "% of the time")
